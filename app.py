@@ -833,4 +833,6 @@ def check_website():
     return render_template('result.html', result=result)
 
 if __name__ == '__main__':
-    app.run(port=3000, debug=True)
+    port = int(os.getenv('PORT', 3000))
+    debug_mode = os.getenv('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

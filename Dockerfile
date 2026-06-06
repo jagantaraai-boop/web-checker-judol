@@ -53,9 +53,8 @@ RUN pip install --no-cache-dir /wheels/* && \
 
 # Install playwright dan browsers
 RUN pip install --no-cache-dir playwright && \
-    # Let Playwright install required system deps for the current distro
-    playwright install-deps || true && \
-    playwright install chromium
+    python -m playwright install-deps || true && \
+    python -m playwright install chromium
 
 # Copy project files
 COPY . .
