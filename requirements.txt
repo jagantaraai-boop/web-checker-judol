@@ -7,5 +7,5 @@ scipy
 joblib
 beautifulsoup4
 requests
+inference-sdk
 playwright
-gunicorn
