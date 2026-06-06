@@ -21,7 +21,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
-    libgconf-2-4 \
+    ca-certificates \
     libglib2.0-0 \
     libx11-6 \
     libx11-xcb1 \
@@ -37,8 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcups2 \
     libxss1 \
     libxkbcommon0 \
-    libgdk-pixbuf2.0-0 \
     libasound2 \
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels dari builder stage
@@ -53,6 +53,8 @@ RUN pip install --no-cache-dir /wheels/* && \
 
 # Install playwright dan browsers
 RUN pip install --no-cache-dir playwright && \
+    # Let Playwright install required system deps for the current distro
+    playwright install-deps || true && \
     playwright install chromium
 
 # Copy project files
@@ -70,5 +72,5 @@ ENV PORT=3000
 # Expose port (Railway akan override ini dengan PORT env var)
 EXPOSE ${PORT}
 
-# Run aplikasi
-CMD ["python", "app.py"]
+# Run aplikasi via Gunicorn (reads $PORT from env)
+CMD gunicorn app:app -b 0.0.0.0:$PORT --workers 1 --threads 2
