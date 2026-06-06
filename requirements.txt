@@ -8,3 +8,4 @@ joblib
 beautifulsoup4
 requests
 playwright
+gunicorn
