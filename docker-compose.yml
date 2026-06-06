@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web-checker-premium
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./static:/app/static
+      - ./templates:/app/templates
+      - ./ML:/app/ML
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PORT=3000
+    env_file:
+      - .env
+    networks:
+      - web-checker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  web-checker-network:
+    driver: bridge
+
