@@ -1,0 +1,2056 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laporan Analisis — Jagantara.AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --navy:       #0A1F38;
+        --navy-mid:   #102A47;
+        --gold:       #D89B2B;
+        --gold-light: #E6B14A;
+        --bg:         #F5F7FA;
+        --card:       #FFFFFF;
+        --border:     #E5EAF0;
+        --text-pri:   #111827;
+        --text-sec:   #6B7280;
+        --success:    #10B981;
+        --warning:    #F59E0B;
+        --danger:     #EF4444;
+        --shadow-sm: 0 1px 3px rgba(10,31,56,0.06),0 1px 2px rgba(10,31,56,0.04);
+        --shadow-md: 0 4px 16px rgba(10,31,56,0.08),0 2px 6px rgba(10,31,56,0.05);
+        --shadow-lg: 0 12px 40px rgba(10,31,56,0.10),0 4px 12px rgba(10,31,56,0.06);
+      }
+
+      body {
+        font-family: 'DM Sans', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text-pri);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(var(--border) 1px, transparent 1px),
+          linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.4;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      nav, main, footer { position: relative; z-index: 1; }
+
+      /* ── NAV ── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 32px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          padding: 0 20px;
+          height: auto;
+          min-height: 56px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+      }
+
+      @media (max-width: 480px) {
+        nav {
+          padding: 0 12px;
+          min-height: 50px;
+          gap: 8px;
+          justify-content: flex-start;
+        }
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--navy);
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.3px;
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 480px) {
+        .nav-brand {
+          font-size: 15px;
+        }
+        .nav-brand-mark {
+          width: 30px !important;
+          height: 30px !important;
+        }
+        .nav-brand-mark svg {
+          width: 16px !important;
+          height: 16px !important;
+        }
+      }
+
+      .nav-brand-mark {
+        width: 34px; height: 34px;
+        background: var(--navy);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .nav-brand-mark svg { width: 18px; height: 18px; fill: var(--gold); }
+
+      .nav-center {
+        flex: 1;
+        max-width: 520px;
+        overflow: hidden;
+      }
+
+      @media (max-width: 768px) {
+        .nav-center {
+          max-width: 300px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .nav-center {
+          display: none;
+        }
+      }
+
+      .nav-url-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        color: var(--text-sec);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+      }
+
+      .nav-url-pill .dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--success);
+        flex-shrink: 0;
+      }
+
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--gold);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 40px;
+        margin-left: auto;
+      }
+
+      @media (max-width: 768px) {
+        .btn-back {
+          margin-left: auto;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .btn-back {
+          font-size: 12px;
+          padding: 8px 12px;
+          margin-left: auto;
+        }
+      }
+
+      .btn-back:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+      /* ── PAGE HEADER ── */
+      .page-header {
+        background: var(--navy);
+        padding: 36px 32px 40px;
+        color: #fff;
+      }
+
+      @media (max-width: 768px) {
+        .page-header {
+          padding: 28px 20px 32px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .page-header {
+          padding: 20px 16px 24px;
+        }
+      }
+
+      .page-header-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .report-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.45);
+        margin-bottom: 14px;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+      }
+
+      .report-breadcrumb span { color: rgba(255,255,255,0.7); }
+
+      .page-header h1 {
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #fff;
+        line-height: 1.2;
+        word-break: break-all;
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 640px) {
+        .page-header h1 {
+          font-size: clamp(18px, 4vw, 24px);
+          margin-bottom: 12px;
+        }
+      }
+
+      .page-header h1 .url-accent { color: var(--gold); }
+
+      .header-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.07);
+        letter-spacing: 0.1px;
+      }
+
+      /* ── MAIN ── */
+      main {
+        flex: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        padding: 32px 24px 80px;
+      }
+
+      @media (max-width: 768px) {
+        main {
+          padding: 24px 16px 60px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        main {
+          padding: 16px 12px 40px;
+        }
+      }
+
+      /* ── SECTION TITLE ── */
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        gap: 12px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-pri);
+        letter-spacing: -0.2px;
+      }
+
+      .section-icon {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .section-icon svg { width: 16px; height: 16px; }
+
+      .icon-blue { background: rgba(10,31,56,0.07); }
+      .icon-blue svg { stroke: var(--navy); }
+      .icon-gold { background: rgba(216,155,43,0.1); }
+      .icon-gold svg { stroke: var(--gold); }
+      .icon-red { background: rgba(239,68,68,0.1); }
+      .icon-red svg { stroke: var(--danger); }
+      .icon-green { background: rgba(16,185,129,0.1); }
+      .icon-green svg { stroke: var(--success); }
+      .icon-orange { background: rgba(245,158,11,0.1); }
+      .icon-orange svg { stroke: var(--warning); }
+
+      /* ── CARD ── */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 0.2s, opacity 0.3s ease;
+        position: relative;
+      }
+
+      .card-hover:hover { box-shadow: var(--shadow-md); }
+
+      /* ── CRAWLING STATUS ── */
+      .crawl-section {
+        margin-bottom: 24px;
+        animation: fadeUp 0.4s ease both;
+        transition: opacity 0.3s ease, max-height 0.3s ease;
+      }
+
+      .crawl-section.complete {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        margin-bottom: 0;
+        pointer-events: none;
+      }
+
+      .crawl-card {
+        background: var(--navy);
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 640px) {
+        .crawl-card {
+          padding: 16px 18px;
+          gap: 14px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .crawl-card {
+          padding: 12px 14px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+      }
+
+      .crawl-spinner {
+        width: 36px; height: 36px;
+        border: 3px solid rgba(216,155,43,0.2);
+        border-top-color: var(--gold);
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        flex-shrink: 0;
+      }
+
+      .crawl-text { flex: 1; min-width: 200px; }
+
+      .crawl-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255,255,255,0.45);
+        margin-bottom: 4px;
+      }
+
+      #crawlStatus {
+        font-size: 13px;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      .crawl-bar-wrap {
+        flex: 1;
+        min-width: 160px;
+        width: 100%;
+        transition: opacity 0.3s ease;
+      }
+
+      .crawl-bar-wrap.hidden {
+        display: none;
+      }
+
+      .crawl-bar-bg {
+        width: 100%;
+        height: 4px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 100px;
+        overflow: hidden;
+      }
+
+      .crawl-bar-fill {
+        height: 100%;
+        background: var(--gold);
+        border-radius: 100px;
+        width: 100%;
+        animation: barPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes barPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      /* ── KPI ROW ── */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+        animation: fadeUp 0.4s ease 0.05s both;
+      }
+
+      @media (max-width: 768px) { 
+        .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
+      }
+
+      @media (max-width: 480px) {
+        .kpi-grid { 
+          grid-template-columns: 1fr; 
+          gap: 10px;
+        } 
+      }
+
+      .kpi-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px 20px;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s, opacity 0.3s ease;
+      }
+
+      @media (max-width: 480px) {
+        .kpi-card {
+          padding: 16px 14px;
+          border-radius: 10px;
+        }
+      }
+
+      .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+      .kpi-bar {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 12px 12px 0 0;
+      }
+
+      .kpi-bar-red    { background: var(--danger); }
+      .kpi-bar-orange { background: var(--warning); }
+      .kpi-bar-green  { background: var(--success); }
+
+      .kpi-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-sec);
+        margin-bottom: 10px;
+      }
+
+      .kpi-value {
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: -1.5px;
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 480px) {
+        .kpi-value {
+          font-size: 32px;
+          letter-spacing: -1px;
+        }
+      }
+
+      .kpi-value.red    { color: var(--danger); }
+      .kpi-value.orange { color: var(--warning); }
+      .kpi-value.green  { color: var(--success); }
+
+      .kpi-desc {
+        font-size: 13px;
+        color: var(--text-sec);
+        line-height: 1.4;
+      }
+
+      /* ── STATUS BANNER ── */
+      .status-banner {
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        border: 1px solid;
+        animation: fadeUp 0.4s ease 0.1s both;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 640px) {
+        .status-banner {
+          padding: 16px 18px;
+          gap: 12px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .status-banner {
+          padding: 14px 14px;
+          border-radius: 10px;
+          gap: 10px;
+        }
+      }
+
+      .status-banner.malicious {
+        background: rgba(239,68,68,0.05);
+        border-color: rgba(239,68,68,0.2);
+      }
+
+      .status-banner.safe {
+        background: rgba(16,185,129,0.05);
+        border-color: rgba(16,185,129,0.2);
+      }
+
+      .status-banner.unknown {
+        background: rgba(245,158,11,0.05);
+        border-color: rgba(245,158,11,0.2);
+      }
+
+      .status-icon-wrap {
+        width: 44px; height: 44px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .status-icon-wrap.malicious { background: rgba(239,68,68,0.1); }
+      .status-icon-wrap.safe      { background: rgba(16,185,129,0.1); }
+      .status-icon-wrap.unknown   { background: rgba(245,158,11,0.1); }
+
+      .status-icon-wrap svg { width: 22px; height: 22px; }
+
+      .status-content { flex: 1; }
+
+      .status-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-sec);
+        margin-bottom: 4px;
+      }
+
+      .status-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      .status-title.malicious { color: var(--danger); }
+      .status-title.safe      { color: var(--success); }
+      .status-title.unknown   { color: var(--warning); }
+
+      .status-sub {
+        font-size: 13px;
+        color: var(--text-sec);
+        margin-top: 2px;
+      }
+
+      .status-badge-pill {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 16px;
+        border-radius: 100px;
+        border: 1px solid;
+        flex-shrink: 0;
+      }
+
+      .status-badge-pill.malicious {
+        color: var(--danger);
+        border-color: rgba(239,68,68,0.3);
+        background: rgba(239,68,68,0.07);
+      }
+
+      .status-badge-pill.safe {
+        color: var(--success);
+        border-color: rgba(16,185,129,0.3);
+        background: rgba(16,185,129,0.07);
+      }
+
+      .status-badge-pill.unknown {
+        color: var(--warning);
+        border-color: rgba(245,158,11,0.3);
+        background: rgba(245,158,11,0.07);
+      }
+
+      /* ── GRID 2-col ── */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+      @media (max-width: 480px) {
+        .grid-2 {
+          gap: 12px;
+        }
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 900px) { 
+        .grid-3 { grid-template-columns: repeat(2, 1fr); } 
+      }
+
+      @media (max-width: 480px) { 
+        .grid-3 { 
+          grid-template-columns: 1fr;
+          gap: 12px;
+        } 
+      }
+
+      /* ── ML ANALYSIS CARD ── */
+      .ml-section { margin-bottom: 24px; animation: fadeUp 0.4s ease 0.12s both; }
+
+      .sub-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 20px;
+        position: relative;
+        transition: opacity 0.3s ease;
+      }
+
+      .sub-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-sec);
+        margin-bottom: 12px;
+      }
+
+      /* Prediction verdict */
+      .verdict-label {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+      }
+
+      .verdict-label.malicious { color: var(--danger); }
+      .verdict-label.safe      { color: var(--success); }
+      .verdict-label.unknown   { color: var(--warning); }
+
+      .verdict-sub { font-size: 13px; color: var(--text-sec); }
+
+      /* Progress bar */
+      .prog-row { margin-bottom: 12px; }
+      .prog-row:last-child { margin-bottom: 0; }
+
+      .prog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .prog-name { font-size: 13px; font-weight: 500; color: var(--text-pri); text-transform: capitalize; }
+      .prog-pct  { font-size: 13px; font-weight: 600; color: var(--navy); font-family: 'DM Mono', monospace; }
+
+      .prog-bg {
+        width: 100%;
+        height: 6px;
+        background: var(--border);
+        border-radius: 100px;
+        overflow: hidden;
+      }
+
+      .prog-fill {
+        height: 100%;
+        border-radius: 100px;
+        background: var(--navy);
+        transition: width 1s ease;
+      }
+
+      /* Confidence bar */
+      .conf-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-sec);
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+
+      .conf-value { color: var(--navy); font-weight: 600; font-family: 'DM Mono', monospace; }
+
+      .conf-bg { width:100%; height:8px; background:var(--border); border-radius:100px; overflow:hidden; }
+      .conf-fill { height:100%; background: var(--gold); border-radius:100px; transition: width 1.2s ease; }
+
+      /* URL metadata */
+      .meta-row { margin-bottom: 12px; }
+      .meta-row:last-child { margin-bottom: 0; }
+      .meta-key { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-sec); margin-bottom: 4px; }
+      .meta-val { font-size: 13px; color: var(--text-pri); font-family: 'DM Mono', monospace; word-break: break-all; }
+      .meta-val.empty { color: var(--text-sec); font-style: italic; font-family: 'DM Sans', sans-serif; }
+
+      /* Features grid */
+      .features-grid-inner {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      @media (min-width: 640px) { .features-grid-inner { grid-template-columns: repeat(3, 1fr); } }
+      @media (min-width: 900px) { .features-grid-inner { grid-template-columns: repeat(4, 1fr); } }
+
+      .feat-item {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+
+      .feat-key { font-size: 11px; color: var(--text-sec); font-weight: 500; margin-bottom: 4px; }
+      .feat-val { font-size: 14px; font-weight: 600; color: var(--text-pri); font-family: 'DM Mono', monospace; }
+
+      /* Indicator tags */
+      .indicator-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+      .indicator-tag {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 6px;
+        background: rgba(10,31,56,0.06);
+        color: var(--navy);
+        border: 1px solid rgba(10,31,56,0.1);
+      }
+
+      /* ── VULNERABILITY / ANOMALY ITEMS ── */
+      .vuln-item {
+        border: 1px solid rgba(239,68,68,0.15);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: rgba(239,68,68,0.03);
+        transition: border-color 0.2s;
+      }
+
+      .vuln-item:hover { border-color: rgba(239,68,68,0.3); }
+      .vuln-item:last-child { margin-bottom: 0; }
+
+      .vuln-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--danger);
+        margin-bottom: 5px;
+      }
+
+      .vuln-desc { font-size: 13px; color: var(--text-sec); margin-bottom: 8px; line-height: 1.5; }
+
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 4px;
+        margin-right: 6px;
+      }
+
+      .tag-red    { background: rgba(239,68,68,0.1);   color: var(--danger);  border: 1px solid rgba(239,68,68,0.2); }
+      .tag-gray   { background: rgba(107,114,128,0.1); color: var(--text-sec); border: 1px solid rgba(107,114,128,0.15); }
+      .tag-orange { background: rgba(245,158,11,0.1);  color: #b45309; border: 1px solid rgba(245,158,11,0.2); }
+      .tag-green  { background: rgba(16,185,129,0.1);  color: #047857; border: 1px solid rgba(16,185,129,0.2); }
+      .tag-navy   { background: rgba(10,31,56,0.07);   color: var(--navy); border: 1px solid rgba(10,31,56,0.12); }
+
+      .empty-state {
+        border: 1px solid rgba(16,185,129,0.15);
+        border-radius: 8px;
+        padding: 16px;
+        background: rgba(16,185,129,0.04);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #047857;
+      }
+
+      .anomaly-item {
+        border: 1px solid rgba(245,158,11,0.18);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        background: rgba(245,158,11,0.03);
+        transition: border-color 0.2s;
+      }
+
+      .anomaly-item:hover { border-color: rgba(245,158,11,0.35); }
+      .anomaly-item:last-child { margin-bottom: 0; }
+
+      .anomaly-url {
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        color: var(--text-pri);
+        word-break: break-all;
+        margin-bottom: 5px;
+      }
+
+      .anomaly-risk { font-size: 12px; color: #b45309; font-weight: 500; }
+
+      /* Toggle btn */
+      .btn-toggle {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text-sec);
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .btn-toggle:hover { background: var(--card); color: var(--text-pri); }
+
+      /* ── ROBOFLOW ── */
+      .roboflow-section { margin-bottom: 24px; animation: fadeUp 0.4s ease 0.2s both; }
+
+      .rf-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 100px;
+        border: 1px solid;
+      }
+
+      .rf-status-pill.danger {
+        color: var(--danger);
+        border-color: rgba(239,68,68,0.25);
+        background: rgba(239,68,68,0.07);
+      }
+
+      .rf-status-pill.safe {
+        color: var(--success);
+        border-color: rgba(16,185,129,0.25);
+        background: rgba(16,185,129,0.07);
+      }
+
+      .rf-status-pill.neutral {
+        color: var(--text-sec);
+        border-color: var(--border);
+        background: var(--bg);
+      }
+
+      .img-frame {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f0f2f5;
+      }
+
+      .img-frame img {
+        width: 100%;
+        display: block;
+        object-fit: contain;
+        max-height: 480px;
+        background: #f0f2f5;
+      }
+
+      .img-empty {
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-sec);
+        font-size: 13px;
+        border: 1.5px dashed var(--border);
+        border-radius: 10px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .rf-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 600px) { .rf-stats-grid { grid-template-columns: 1fr; } }
+
+      .rf-stat {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        background: var(--bg);
+      }
+
+      .rf-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; color: var(--text-sec); margin-bottom: 8px; }
+      .rf-stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+
+      /* ── PREDICTIONS TABLE ── */
+      .table-wrap {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 20px;
+      }
+
+      .table-header {
+        background: var(--navy);
+        padding: 14px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: rgba(255,255,255,0.7);
+      }
+
+      table { width: 100%; border-collapse: collapse; }
+      thead th {
+        text-align: left;
+        padding: 11px 18px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-sec);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+
+      tbody tr { border-bottom: 1px solid var(--border); }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:nth-child(even) { background: rgba(245,247,250,0.6); }
+      tbody tr:hover { background: rgba(10,31,56,0.03); }
+      tbody td { padding: 12px 18px; font-size: 13px; color: var(--text-pri); }
+      tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-sec); }
+      .table-empty td { color: var(--text-sec); text-align: center; padding: 28px; font-size: 13px; }
+
+      /* ── RISK / RECOMMENDATIONS ── */
+      .rec-section { margin-bottom: 24px; animation: fadeUp 0.4s ease 0.25s both; }
+
+      .rec-list { list-style: none; }
+
+      .rec-item {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+        color: var(--text-pri);
+        line-height: 1.55;
+      }
+
+      .rec-item:last-child { border-bottom: none; }
+
+      .rec-num {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--gold);
+        background: rgba(216,155,43,0.1);
+        border: 1px solid rgba(216,155,43,0.2);
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* Risk bars */
+      .risk-row { margin-bottom: 18px; }
+      .risk-row:last-child { margin-bottom: 0; }
+      .risk-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+      .risk-name { font-size: 13px; font-weight: 500; color: var(--text-pri); }
+      .risk-pct  { font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text-sec); }
+      .risk-bg   { width:100%; height:6px; background:var(--border); border-radius:100px; overflow:hidden; }
+      .risk-fill-red    { height:100%; background: var(--danger);  border-radius:100px; }
+      .risk-fill-orange { height:100%; background: var(--warning); border-radius:100px; }
+      .risk-fill-navy   { height:100%; background: var(--navy);    border-radius:100px; }
+      .risk-sub  { font-size: 12px; color: var(--text-sec); margin-top: 4px; }
+
+      /* ── CTA ── */
+      .cta-section {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+        animation: fadeUp 0.4s ease 0.3s both;
+      }
+
+      @media (max-width: 480px) {
+        .cta-section {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      .btn-primary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--gold); color: #fff;
+        border: none; border-radius: 10px;
+        padding: 12px 24px;
+        font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        white-space: nowrap;
+        min-height: 44px;
+        justify-content: center;
+      }
+
+      @media (max-width: 480px) {
+        .btn-primary {
+          padding: 12px 18px;
+          font-size: 13px;
+          width: 100%;
+        }
+      }
+
+      .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(216,155,43,0.25); }
+
+      .btn-secondary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--card); color: var(--text-pri);
+        border: 1px solid var(--border); border-radius: 10px;
+        padding: 12px 24px;
+        font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        white-space: nowrap;
+        min-height: 44px;
+        justify-content: center;
+      }
+
+      @media (max-width: 480px) {
+        .btn-secondary {
+          padding: 12px 18px;
+          font-size: 13px;
+          width: 100%;
+        }
+      }
+
+      .btn-secondary:hover { border-color: var(--navy); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+
+      /* ── FOOTER NOTE ── */
+      .footer-note {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        animation: fadeUp 0.4s ease 0.35s both;
+        margin-bottom: 8px;
+      }
+
+      .footer-note-left { font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+      .footer-note-left strong { color: var(--text-pri); }
+
+      .footer-note-right { font-size: 12px; color: var(--text-sec); font-family: 'DM Mono', monospace; }
+
+      /* ── GLOBAL FOOTER ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      @media (max-width: 640px) {
+        footer {
+          padding: 16px 20px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        footer {
+          padding: 12px 12px;
+        }
+        .footer-left, .footer-right {
+          font-size: 11px;
+        }
+      }
+
+      .footer-left { font-size: 13px; color: var(--text-sec); }
+      .footer-left strong { color: var(--navy); }
+      .footer-right { display: flex; gap: 20px; }
+      .footer-link { font-size: 13px; color: var(--text-sec); text-decoration: none; transition: color 0.2s; }
+      .footer-link:hover { color: var(--navy); }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Skeleton Loading Animation */
+      @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+
+      .skeleton-loading {
+        background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+        border-radius: 8px;
+      }
+
+      .card.loading,
+      .kpi-card.loading,
+      .sub-card.loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .card.loading::before,
+      .kpi-card.loading::before,
+      .sub-card.loading::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 100%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      .card.loading,
+      .kpi-card.loading,
+      .sub-card.loading {
+        position: relative;
+      }
+
+      .hidden { display: none !important; }
+      .page-transition { animation: fadeUp 0.35s ease both; }
+
+      @media print {
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body { background: #fff !important; margin: 0; padding: 0; }
+        body::before { display: none !important; }
+        nav { display: none !important; visibility: hidden !important; position: absolute !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
+        footer { display: none !important; visibility: hidden !important; position: absolute !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
+        .btn-back, .cta-section, .crawl-section, .footer-note { display: none !important; visibility: hidden !important; }
+        main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+        .page-header { background: var(--navy) !important; padding: 12px 10px !important; border-bottom: 2px solid var(--gold) !important; page-break-after: avoid; margin: 0 !important; }
+        .page-header-inner { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .page-header h1 { font-size: 18px !important; margin: 0 0 6px 0 !important; font-weight: 700 !important; line-height: 1.2 !important; }
+        .report-breadcrumb { font-size: 8px !important; margin: 0 0 4px 0 !important; }
+        .meta-chip { font-size: 8px !important; padding: 3px 8px !important; }
+        .section-title { font-size: 13px !important; font-weight: 700 !important; margin: 0 !important; }
+        .section-icon { width: 20px !important; height: 20px !important; flex-shrink: 0; }
+        .kpi-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+        .kpi-card { padding: 10px 8px !important; border: 1px solid #ddd !important; background: #fff !important; page-break-inside: avoid; break-inside: avoid; }
+        .kpi-card.loading { opacity: 1 !important; pointer-events: auto !important; }
+        .kpi-card.loading::before { display: none !important; }
+        .kpi-label { font-size: 7px !important; margin-bottom: 3px !important; }
+        .kpi-value { font-size: 26px !important; margin-bottom: 3px !important; line-height: 1 !important; }
+        .kpi-desc { font-size: 9px !important; line-height: 1.3 !important; color: #666 !important; margin: 0 !important; }
+        .status-banner { padding: 10px 12px !important; margin-bottom: 10px !important; page-break-inside: avoid; border-radius: 6px !important; }
+        .status-icon-wrap { width: 28px !important; height: 28px !important; flex-shrink: 0; }
+        .status-title { font-size: 14px !important; margin: 0 !important; font-weight: 600 !important; }
+        .status-sub { font-size: 10px !important; margin: 2px 0 0 0 !important; }
+        .grid-2 { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+        .grid-2 > div { page-break-inside: avoid; break-inside: avoid; }
+        .grid-3 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+        .grid-3 > div { page-break-inside: avoid; break-inside: avoid; }
+        .card { padding: 10px !important; margin-bottom: 8px !important; border: 1px solid #ddd !important; background: #fff !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
+        .card.loading { opacity: 1 !important; pointer-events: auto !important; }
+        .card.loading::before { display: none !important; }
+        .card > h3 { font-size: 12px !important; margin: 0 0 6px 0 !important; }
+        .ml-section { margin-bottom: 12px !important; page-break-inside: avoid; }
+        .sub-card { padding: 9px !important; margin-bottom: 6px !important; background: #f9f9f9 !important; border: 1px solid #ddd !important; page-break-inside: avoid; break-inside: avoid; }
+        .sub-card.loading { opacity: 1 !important; pointer-events: auto !important; }
+        .sub-card.loading::before { display: none !important; }
+        .sub-label { font-size: 7px !important; margin-bottom: 5px !important; color: #666 !important; font-weight: 600 !important; }
+        .verdict-label { font-size: 16px !important; margin: 0 0 3px 0 !important; font-weight: 700 !important; }
+        .verdict-sub { font-size: 9px !important; color: #666 !important; margin: 0 !important; }
+        .prog-row { margin-bottom: 10px !important; page-break-inside: avoid; }
+        .prog-name { font-size: 11px !important; }
+        .prog-bg { height: 5px !important; }
+        .prog-fill { background: var(--navy) !important; }
+        .conf-label { font-size: 11px !important; }
+        .conf-bg { height: 6px !important; }
+        .conf-fill { background: var(--gold) !important; }
+        .meta-key { font-size: 7px !important; color: #666 !important; margin-bottom: 2px !important; }
+        .meta-val { font-size: 9px !important; word-break: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; margin-bottom: 6px !important; }
+        .features-grid-inner { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; margin-top: 8px !important; }
+        .feat-item { padding: 8px !important; font-size: 9px !important; border: 1px solid #e0e0e0 !important; }
+        .feat-key { font-size: 7px !important; color: #999 !important; margin-bottom: 2px !important; }
+        .feat-val { font-size: 10px !important; font-weight: 600 !important; }
+        .vuln-item { padding: 8px !important; margin-bottom: 6px !important; border: 1px solid #ffcccc !important; background: #fff5f5 !important; page-break-inside: avoid; break-inside: avoid; }
+        .anomaly-item { padding: 8px !important; margin-bottom: 6px !important; border: 1px solid #ffd699 !important; background: #fffaf0 !important; page-break-inside: avoid; break-inside: avoid; }
+        .vuln-title, .anomaly-url { font-size: 9px !important; font-weight: 600 !important; margin-bottom: 3px !important; }
+        .vuln-desc, .anomaly-risk { font-size: 8px !important; line-height: 1.3 !important; }
+        .tag { font-size: 7px !important; padding: 2px 4px !important; margin-right: 3px !important; margin-bottom: 2px !important; }
+        .empty-state { padding: 12px !important; font-size: 11px !important; }
+        .indicator-tag { font-size: 10px !important; padding: 4px 8px !important; }
+        .roboflow-section { margin-bottom: 16px !important; page-break-inside: avoid; }
+        .rf-status-pill { font-size: 10px !important; padding: 5px 12px !important; }
+        
+        /* Progress and confidence bars */
+        .prog-row { margin-bottom: 8px !important; page-break-inside: avoid; }
+        .prog-name { font-size: 9px !important; font-weight: 500 !important; }
+        .prog-pct { font-size: 9px !important; font-weight: 600 !important; }
+        .prog-bg { height: 4px !important; background: #e0e0e0 !important; }
+        .prog-fill { background: var(--navy) !important; height: 100%; }
+        .conf-label { font-size: 9px !important; margin-bottom: 2px !important; }
+        .conf-bg { height: 5px !important; background: #e0e0e0 !important; }
+        .conf-fill { background: var(--gold) !important; height: 100%; }
+        
+        .ml-section { margin-bottom: 10px !important; page-break-inside: avoid; }
+        .img-frame { margin: 6px 0 !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
+        .img-frame img { max-height: 250px !important; width: 100% !important; display: block !important; page-break-inside: avoid; }
+        .img-empty { height: 100px !important; font-size: 9px !important; border: 1px dashed #ddd !important; }
+        .rf-stats-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; margin-top: 8px !important; }
+        .rf-stat { padding: 8px !important; background: #f9f9f9 !important; border: 1px solid #e0e0e0 !important; }
+        .rf-stat-label { font-size: 7px !important; color: #999 !important; }
+        .rf-stat-value { font-size: 16px !important; font-weight: 700 !important; }
+        .table-wrap { margin-top: 8px !important; page-break-inside: avoid; border: 1px solid #ddd !important; }
+        .table-header { background: var(--navy) !important; color: #fff !important; padding: 5px 8px !important; font-size: 8px !important; }
+        table { width: 100% !important; border-collapse: collapse !important; }
+        thead th { padding: 5px 6px !important; font-size: 7px !important; background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+        tbody td { padding: 5px 6px !important; font-size: 8px !important; border: 1px solid #e5e5e5 !important; }
+        tbody tr:nth-child(even) { background: #fafafa !important; }
+        .rec-section { margin-bottom: 10px !important; page-break-inside: avoid; }
+        .rec-item { padding: 7px 0 !important; border-bottom: 1px solid #e5e5e5 !important; font-size: 9px !important; page-break-inside: avoid; break-inside: avoid; line-height: 1.4; }
+        .rec-item:last-child { border-bottom: none !important; }
+        .rec-num { width: 18px !important; height: 18px !important; min-width: 18px !important; font-size: 8px !important; }
+        .risk-row { margin-bottom: 8px !important; page-break-inside: avoid; }
+        .risk-name { font-size: 9px !important; }
+        .risk-pct { font-size: 8px !important; }
+        .risk-bg { height: 4px !important; }
+        * { animation: none !important; transition: none !important; }
+        a { color: #0066cc !important; text-decoration: underline !important; }
+        
+        h1, h2, h3, h4, h5, h6 { page-break-after: avoid; margin: 0 !important; }
+        img { page-break-inside: avoid; max-width: 100% !important; height: auto !important; }
+        table, tr, td { page-break-inside: avoid !important; break-inside: avoid !important; }
+        p { page-break-inside: avoid; margin: 0 !important; }
+        
+        /* Prevent text overflow and ensure wrapping */
+        body, main, div { overflow: visible !important; }
+        .meta-val, .vuln-desc, .anomaly-risk, .verdict-sub { 
+          word-break: break-word !important; 
+          overflow-wrap: break-word !important;
+          white-space: normal !important;
+          hyphens: auto !important;
+        }
+        
+        /* Ensure all text is visible */
+        * { -webkit-box-decoration-break: clone !important; box-decoration-break: clone !important; }
+        
+        /* Remove browser printing headers/footers */
+        @page { margin: 0.5in; size: letter; orphans: 4; widows: 4; }
+      }
+    </style>
+    <script>
+      function animateCounter(element, target, duration = 1000) {
+        let current = 0;
+        const increment = target / (duration / 16);
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            element.textContent = target;
+            clearInterval(timer);
+          } else {
+            element.textContent = Math.floor(current);
+          }
+        }, 16);
+      }
+
+      function showCrawlingAnimation() {
+        const crawlSteps = [
+          'Scanning DNS Records...',
+          'Analyzing SSL Certificate...',
+          'Crawling Web Pages...',
+          'Detecting Suspicious URLs...',
+          'Analyzing Link Integrity...',
+          'Scanning for Malware...',
+          'Generating Report...'
+        ];
+        let step = 0;
+        const crawlElement = document.getElementById('crawlStatus');
+        const spinner = document.querySelector('.crawl-spinner');
+        const crawlSection = document.querySelector('.crawl-section');
+        const crawlBarWrap = document.querySelector('.crawl-bar-wrap');
+        
+        // Add loading skeleton to all cards
+        const cards = document.querySelectorAll('.card, .kpi-card, .sub-card');
+        cards.forEach(card => card.classList.add('loading'));
+        
+        const interval = setInterval(() => {
+          if (crawlElement && step < crawlSteps.length) {
+            crawlElement.textContent = crawlSteps[step];
+            step++;
+          } else {
+            clearInterval(interval);
+            if (crawlElement) {
+              crawlElement.innerHTML = '<span style="color:var(--success)">&#10003;</span> Analisis Selesai';
+            }
+            if (spinner) {
+              spinner.style.borderTopColor = 'var(--success)';
+              spinner.style.animation = 'none';
+            }
+            // Hide progress bar
+            if (crawlBarWrap) {
+              crawlBarWrap.classList.add('hidden');
+            }
+            // Remove loading effect from cards
+            cards.forEach(card => card.classList.remove('loading'));
+            
+            // Hide crawl section after delay
+            setTimeout(() => {
+              if (crawlSection) {
+                crawlSection.classList.add('complete');
+              }
+            }, 2000);
+          }
+        }, 600);
+      }
+
+      window.addEventListener('load', () => {
+        document.body.classList.add('page-transition');
+        
+        // Check if crawl section exists (still loading)
+        const crawlSection = document.querySelector('.crawl-section');
+        if (crawlSection && !crawlSection.classList.contains('complete')) {
+          showCrawlingAnimation();
+        }
+
+        const seoElement = document.getElementById('seoScore');
+        if (seoElement) animateCounter(seoElement, parseInt(seoElement.getAttribute('data-value')), 1500);
+
+        const loadElement = document.getElementById('loadTime');
+        if (loadElement) {
+          const loadTime = parseFloat(loadElement.getAttribute('data-value'));
+          let current = 0;
+          const increment = loadTime / 100;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= loadTime) {
+              loadElement.textContent = loadTime.toFixed(2);
+              clearInterval(timer);
+            } else {
+              loadElement.textContent = current.toFixed(2);
+            }
+          }, 15);
+        }
+
+        setTimeout(() => {
+          const vulnCount = document.getElementById('vulnCount');
+          if (vulnCount) animateCounter(vulnCount, parseInt(vulnCount.getAttribute('data-value')), 1000);
+          const anomalyCount = document.getElementById('anomalyCount');
+          if (anomalyCount) animateCounter(anomalyCount, parseInt(anomalyCount.getAttribute('data-value')), 1000);
+        }, 3000);
+      });
+
+      function toggleDetails(id) {
+        const elem = document.getElementById(id);
+        if (elem) elem.classList.toggle('hidden');
+      }
+    </script>
+  </head>
+  <body>
+
+    <!-- Navigation -->
+    <nav>
+      <a href="/" class="nav-brand">
+        <div class="nav-brand-mark">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+          </svg>
+        </div>
+        Jagantara.AI
+      </a>
+
+      <div class="nav-center">
+        <div class="nav-url-pill">
+          <span class="dot"></span>
+          {{ result.url }}
+        </div>
+      </div>
+
+      <a href="/" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Cek Website Lain
+      </a>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="report-breadcrumb">
+          <a href="/" style="color:inherit;text-decoration:none;">Home</a>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Laporan Analisis</span>
+        </div>
+        <h1>
+          Analisis: <span class="url-accent">{{ result.url }}</span>
+        </h1>
+        <div class="header-meta">
+          <span class="meta-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Real-time Scan
+          </span>
+          <span class="meta-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            AI-Powered Detection
+          </span>
+          <span class="meta-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Risk Score: {{ result.risk_score }}/100
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <main>
+
+      <!-- 1. CRAWLING STATUS -->
+      <div class="crawl-section">
+        <div class="crawl-card">
+          <div class="crawl-spinner"></div>
+          <div class="crawl-text">
+            <div class="crawl-label">Scan Progress</div>
+            <div id="crawlStatus">Memulai analisis...</div>
+          </div>
+          <div class="crawl-bar-wrap">
+            <div class="crawl-bar-bg">
+              <div class="crawl-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. STATUS BANNER -->
+      {% if result.ml_label == 'malicious' %}
+        <div class="status-banner malicious">
+          <div class="status-icon-wrap malicious">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="status-content">
+            <div class="status-label">Status Keamanan Website</div>
+            <div class="status-title malicious">BERBAHAYA — URL Terdeteksi Malicious / Judol</div>
+            <div class="status-sub">Website ini terdeteksi sebagai berbahaya. Hindari mengakses atau mempercayai kontennya.</div>
+          </div>
+          <span class="status-badge-pill malicious">HIGH RISK</span>
+        </div>
+      {% elif result.ml_label == 'safe' %}
+        <div class="status-banner safe">
+          <div class="status-icon-wrap safe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </div>
+          <div class="status-content">
+            <div class="status-label">Status Keamanan Website</div>
+            <div class="status-title safe">AMAN — Tidak Ada Ancaman Terdeteksi</div>
+            <div class="status-sub">Website ini tidak menunjukkan tanda-tanda berbahaya berdasarkan analisis AI.</div>
+          </div>
+          <span class="status-badge-pill safe">SAFE</span>
+        </div>
+      {% else %}
+        <div class="status-banner unknown">
+          <div class="status-icon-wrap unknown">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div class="status-content">
+            <div class="status-label">Status Keamanan Website</div>
+            <div class="status-title unknown">WASPADA — Status Tidak Dapat Dipastikan</div>
+            <div class="status-sub">Analisis tidak memberikan hasil konklusif. Disarankan untuk berhati-hati.</div>
+          </div>
+          <span class="status-badge-pill unknown">UNKNOWN</span>
+        </div>
+      {% endif %}
+
+      <!-- 3. KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-bar kpi-bar-red"></div>
+          <div class="kpi-label">Tingkat Ancaman</div>
+          <div class="kpi-value {% if result.ml_label == 'malicious' %}red{% elif result.ml_label == 'safe' %}green{% else %}orange{% endif %}">
+            {% if result.ml_label == 'malicious' %}TINGGI{% elif result.ml_label == 'safe' %}RENDAH{% else %}MEDIUM{% endif %}
+          </div>
+          <div class="kpi-desc">
+            {% if result.ml_label == 'malicious' %}Website terdeteksi berbahaya{% elif result.ml_label == 'safe' %}Aman dari ancaman umum{% else %}Tidak dapat dikonfirmasi{% endif %}
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-bar kpi-bar-orange"></div>
+          <div class="kpi-label">Kerentanan Ditemukan</div>
+          <div class="kpi-value orange" id="vulnCount" data-value="{{ result.vulnerabilities|length }}">0</div>
+          <div class="kpi-desc">Celah keamanan dari sinyal ML</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-bar kpi-bar-green"></div>
+          <div class="kpi-label">URL Anomali</div>
+          <div class="kpi-value red" id="anomalyCount" data-value="{{ result.anomalies|length }}">0</div>
+          <div class="kpi-desc">Link mencurigakan dari pola URL</div>
+        </div>
+      </div>
+
+      <!-- 4. ML ANALYSIS -->
+      <div class="ml-section">
+        <div class="card" style="margin-bottom:24px;">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-icon icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+                </svg>
+              </div>
+              AI Security Analysis (ML Model)
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <!-- Prediction -->
+            <div class="sub-card">
+              <div class="sub-label">Prediksi Keamanan</div>
+              {% if result.ml_label == 'malicious' %}
+                <div class="verdict-label malicious">⚠ MALICIOUS</div>
+                <div class="verdict-sub">URL terdeteksi berbahaya / judol</div>
+              {% elif result.ml_label == 'safe' %}
+                <div class="verdict-label safe">✓ SAFE</div>
+                <div class="verdict-sub">URL aman dan terpercaya</div>
+              {% else %}
+                <div class="verdict-label unknown">? UNKNOWN</div>
+                <div class="verdict-sub">Tidak dapat ditentukan</div>
+              {% endif %}
+
+              <div style="margin-top:16px;">
+                <div class="conf-label">
+                  <span>Confidence Level</span>
+                  <span class="conf-value">{{ "%.1f" | format(result.ml_confidence * 100) }}%</span>
+                </div>
+                <div class="conf-bg">
+                  <div class="conf-fill" style="width:{{ result.ml_confidence * 100 }}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Probability -->
+            <div class="sub-card">
+              <div class="sub-label">Analisis Probabilitas</div>
+              {% for class_name, prob_value in result.ml_probabilities.items() %}
+                <div class="prog-row">
+                  <div class="prog-header">
+                    <span class="prog-name">{{ class_name }}</span>
+                    <span class="prog-pct">{{ "%.1f" | format(prob_value * 100) }}%</span>
+                  </div>
+                  <div class="prog-bg">
+                    <div class="prog-fill" style="width:{{ prob_value * 100 }}%"></div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- URL Metadata -->
+            <div class="sub-card">
+              <div class="sub-label">URL Metadata</div>
+              <div class="meta-row">
+                <div class="meta-key">Page Title</div>
+                <div class="meta-val {% if not result.title or result.title == '-' %}empty{% endif %}">
+                  {{ result.title if result.title and result.title != '-' else '(No title found)' }}
+                </div>
+              </div>
+              <div class="meta-row">
+                <div class="meta-key">Meta Description</div>
+                <div class="meta-val {% if not result.meta_description or result.meta_description == '-' %}empty{% endif %}">
+                  {{ result.meta_description if result.meta_description and result.meta_description != '-' else '(No description)' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detected Features -->
+          {% if result.features %}
+          <div style="margin-top:16px;">
+            <div class="sub-label" style="margin-bottom:10px;">Detected Features</div>
+            <div class="features-grid-inner">
+              <div class="feat-item">
+                <div class="feat-key">Domain Entropy</div>
+                <div class="feat-val">{{ "%.3f" | format(result.features.domain_entropy) }}</div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-key">Keyword Density</div>
+                <div class="feat-val">{{ "%.3f" | format(result.features.keyword_density) }}</div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-key">Judol Hits</div>
+                <div class="feat-val">{{ result.features.judol_hits_total }}</div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-key">Suspicious TLD</div>
+                <div class="feat-val">{{ result.features.is_suspicious_tld }}</div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-key">URL Length</div>
+                <div class="feat-val">{{ result.features.url_length }}</div>
+              </div>
+              <div class="feat-item">
+                <div class="feat-key">HTTPS</div>
+                <div class="feat-val">{{ "Yes" if result.features.https else "No" }}</div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Detection Reasons -->
+          <div style="margin-top:16px;">
+            <div class="sub-label" style="margin-bottom:8px;">Alasan Deteksi</div>
+            <div class="indicator-wrap">
+              {% if result.analysis_indicators %}
+                {% for indicator in result.analysis_indicators %}
+                  <span class="indicator-tag">{{ indicator }}</span>
+                {% endfor %}
+              {% else %}
+                <span style="font-size:13px;color:var(--text-sec);">Tidak ada sinyal tambahan yang menonjol</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. VULNERABILITIES + ANOMALIES -->
+      <div class="grid-2" style="animation: fadeUp 0.4s ease 0.15s both;">
+        <!-- Vulnerabilities -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-icon icon-red">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              Kerentanan Keamanan
+            </div>
+            <button class="btn-toggle" onclick="toggleDetails('vulnDetails')">Toggle</button>
+          </div>
+
+          <div id="vulnDetails">
+            {% if result.vulnerabilities %}
+              {% for vuln in result.vulnerabilities %}
+                <div class="vuln-item">
+                  <div class="vuln-title">{{ loop.index }}. {{ vuln.title }}</div>
+                  <div class="vuln-desc">{{ vuln.description }}</div>
+                  <span class="tag tag-red">{{ vuln.severity }}</span>
+                  <span class="tag tag-gray">{{ vuln.domain }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Tidak ada kerentanan yang terdeteksi
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Anomalous URLs -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-icon icon-orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+              URL Anomali Terdeteksi
+            </div>
+            <button class="btn-toggle" onclick="toggleDetails('anomalyDetails')">Toggle</button>
+          </div>
+
+          <div id="anomalyDetails">
+            {% if result.anomalies %}
+              {% for anomaly in result.anomalies %}
+                <div class="anomaly-item">
+                  <div class="anomaly-url">{{ anomaly.url }}</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <div class="anomaly-risk">{{ anomaly.risk }}</div>
+                    <span class="tag tag-orange">ANOMALY</span>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Tidak ada pola URL anomali terdeteksi
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. ROBOFLOW SCREENSHOT ANALYSIS -->
+      {% if not result.is_safe_label %}
+      <div class="roboflow-section">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-icon icon-gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              Roboflow Advertisement Scan
+            </div>
+            {% if result.roboflow.enabled and result.roboflow.gambling_detected %}
+              <span class="rf-status-pill danger">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Gambling Ads Detected
+              </span>
+            {% elif result.roboflow.enabled %}
+              <span class="rf-status-pill safe">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                No Gambling Ads Flagged
+              </span>
+            {% else %}
+              <span class="rf-status-pill neutral">Roboflow Belum Aktif</span>
+            {% endif %}
+          </div>
+
+          {% if result.roboflow.error and not result.roboflow.enabled %}
+            <div style="padding: 14px 18px; margin-bottom: 20px; border-radius: 12px; background: rgba(255, 243, 205, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); color: #92400e; font-size: 13px;">
+              <strong>Roboflow tidak dijalankan:</strong> {{ result.roboflow.error }}
+            </div>
+          {% endif %}
+
+          <p style="font-size:13px;color:var(--text-sec);margin-bottom:20px;line-height:1.6;">
+            Jalur ini aktif ketika URL awal terindikasi judol. Screenshot dikirim ke workflow Roboflow untuk melokalisasi area iklan perjudian secara visual.
+          </p>
+
+          {% if result.roboflow.enabled %}
+            <div class="grid-2" style="margin-bottom:0;">
+              <div>
+                <div class="sub-label" style="margin-bottom:10px;">Original Screenshot</div>
+                {% if result.screenshot.path %}
+                  <div class="img-frame">
+                    <img src="{{ url_for('static', filename=result.screenshot.path) }}" alt="Website screenshot" />
+                  </div>
+                {% else %}
+                  <div class="img-empty">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Screenshot tidak tersedia
+                  </div>
+                {% endif %}
+              </div>
+
+              <div>
+                <div class="sub-label" style="margin-bottom:10px;">Annotated Result <span style="color:var(--text-sec);font-weight:400;text-transform:none;letter-spacing:0;">(Roboflow output)</span></div>
+                {% if result.roboflow.annotated_image_url %}
+                  <div class="img-frame">
+                    <img src="{{ result.roboflow.annotated_image_url }}" alt="Annotated screenshot" />
+                  </div>
+                {% else %}
+                  <div class="img-empty">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Annotated image belum tersedia
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="rf-stats-grid">
+              <div class="rf-stat">
+                <div class="rf-stat-label">Judol Flag</div>
+                <div class="rf-stat-value {% if result.roboflow.gambling_detected %}red{% else %}green{% endif %}" style="color:{% if result.roboflow.gambling_detected %}var(--danger){% else %}var(--success){% endif %}">
+                  {% if result.roboflow.gambling_detected %}YES{% else %}NO{% endif %}
+                </div>
+              </div>
+              <div class="rf-stat">
+                <div class="rf-stat-label">Detections</div>
+                <div class="rf-stat-value" style="color:var(--navy)">{{ result.roboflow.ad_count }}</div>
+              </div>
+              <div class="rf-stat">
+                <div class="rf-stat-label">Scan Status</div>
+                <div style="font-size:13px;font-weight:600;margin-top:8px;color:{% if result.roboflow.error %}var(--warning){% else %}var(--success){% endif %}">
+                  {% if result.roboflow.error %}{{ result.roboflow.error }}{% else %}Workflow berhasil diproses{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Predictions Table -->
+            <div class="table-wrap">
+              <div class="table-header">Prediction Table</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Confidence</th>
+                    <th>BBox</th>
+                    <th>Focus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if result.roboflow.predictions %}
+                    {% for prediction in result.roboflow.predictions %}
+                      <tr>
+                        <td><strong>{{ prediction.class }}</strong></td>
+                        <td>{{ "%.1f" | format(prediction.confidence * 100) }}%</td>
+                        <td class="mono">x={{ prediction.x }}, y={{ prediction.y }}, w={{ prediction.width }}, h={{ prediction.height }}</td>
+                        <td>
+                          {% if 'ad' in prediction.class|lower or 'banner' in prediction.class|lower or 'promo' in prediction.class|lower or 'slot' in prediction.class|lower or 'casino' in prediction.class|lower %}
+                            <span class="tag tag-red">Advertisement / Judol</span>
+                          {% else %}
+                            <span class="tag tag-gray">Other</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr class="table-empty">
+                      <td colspan="4">Tidak ada prediksi yang dikembalikan workflow.</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+          {% else %}
+            <div class="empty-state" style="color:var(--text-sec);border-color:var(--border);background:var(--bg);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {% if result.roboflow.error %}
+                Roboflow tidak dijalankan: {{ result.roboflow.error }}
+              {% else %}
+                Screenshot review belum dijalankan. Pastikan URL terdeteksi sebagai judol dan environment Roboflow sudah diisi: <code style="font-family:'DM Mono',monospace;background:rgba(10,31,56,0.06);padding:2px 6px;border-radius:4px;">ROBOFLOW_API_KEY</code>, <code style="font-family:'DM Mono',monospace;background:rgba(10,31,56,0.06);padding:2px 6px;border-radius:4px;">ROBOFLOW_WORKSPACE</code>, dan <code style="font-family:'DM Mono',monospace;background:rgba(10,31,56,0.06);padding:2px 6px;border-radius:4px;">ROBOFLOW_WORKFLOW_ID</code>.
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 7. RECOMMENDATIONS + RISK ASSESSMENT -->
+      <div class="rec-section">
+        <div class="grid-2" style="margin-bottom:0;">
+          <!-- Recommendations -->
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-icon icon-green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                </div>
+                Tindakan Perbaikan
+              </div>
+            </div>
+            <ul class="rec-list">
+              {% if result.recommendations %}
+                {% for recommendation in result.recommendations %}
+                  <li class="rec-item">
+                    <span class="rec-num">{{ loop.index }}</span>
+                    <span>{{ recommendation }}</span>
+                  </li>
+                {% endfor %}
+              {% else %}
+                <li class="rec-item">
+                  <span class="rec-num">1</span>
+                  <span>Tidak ada tindakan tambahan yang perlu diambil saat ini.</span>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+
+          <!-- Risk Assessment -->
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-icon icon-orange">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                </div>
+                Penilaian Risiko
+              </div>
+            </div>
+
+            <div class="risk-row">
+              <div class="risk-meta">
+                <span class="risk-name">Risiko Kompromis</span>
+                <span class="risk-pct">{{ result.risk_score }}%</span>
+              </div>
+              <div class="risk-bg">
+                <div class="risk-fill-red" style="width:{{ result.risk_score }}%"></div>
+              </div>
+              <div class="risk-sub">{{ result.risk_level|title }} Risk</div>
+            </div>
+
+            <div class="risk-row">
+              <div class="risk-meta">
+                <span class="risk-name">Kerentanan Umum</span>
+                <span class="risk-pct">{{ (result.vulnerabilities|length * 18) if result.vulnerabilities else 10 }}%</span>
+              </div>
+              <div class="risk-bg">
+                <div class="risk-fill-orange" style="width:{{ (result.vulnerabilities|length * 18) if result.vulnerabilities else 10 }}%"></div>
+              </div>
+              <div class="risk-sub">{{ result.vulnerabilities|length }} item(s) exposed</div>
+            </div>
+
+            <div class="risk-row">
+              <div class="risk-meta">
+                <span class="risk-name">Data Breach Likelihood</span>
+                <span class="risk-pct">{{ (result.features.judol_hits_total * 15) if result.features else 0 }}%</span>
+              </div>
+              <div class="risk-bg">
+                <div class="risk-fill-navy" style="width:{{ (result.features.judol_hits_total * 15) if result.features else 0 }}%"></div>
+              </div>
+              <div class="risk-sub">Keyword-driven risk signal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. CTA BUTTONS -->
+      <div class="cta-section">
+        <a href="/" class="btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Analisis Website Lain
+        </a>
+        <button onclick="window.print()" class="btn-secondary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Export PDF Report
+        </button>
+        <a href="/home" class="btn-secondary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+      </div>
+
+      <!-- 9. FOOTER NOTE -->
+      <div class="footer-note">
+        <div class="footer-note-left">
+          <strong>Jagantara.AI</strong> — SaaS Platform Deteksi URL Anomali<br>
+          Laporan ini dibuat menggunakan teknologi Deep Learning & Advanced URL Analysis™
+        </div>
+        <div class="footer-note-right">
+          Enkripsi End-to-End &nbsp;·&nbsp; {{ "now" }}
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-left">
+        © 2026 <strong>Jagantara.AI</strong> &mdash; Website Integrity & Threat Monitoring Platform
+      </div>
+      <div class="footer-right">
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="#" class="footer-link">Terms</a>
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+    </footer>
+
+  </body>
+</html>

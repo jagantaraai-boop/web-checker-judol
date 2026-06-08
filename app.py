@@ -76,6 +76,20 @@ REDIRECT_INDICATORS = [
     "ref", "aff", "affiliate", "link", "url", "visit",
 ]
 
+# Educational and news domains that may legitimately discuss gambling
+EDUCATIONAL_NEWS_DOMAINS = [
+    "wikipedia.org", "bbc.com", "aljazeera.com", "bbc.co.uk",
+    "news.google.com", "reuters.com", "apnews.com", "theguardian.com",
+    "kompas.com", "detik.com", "liputan6.com", "tirto.id",
+    "tempo.co", "merdeka.com", "indozone.id", "cnnindonesia.com",
+    "kumparan.com", "tribunnews.com", "okezone.com", "grid.id",
+    "media.id", "berita.id", "pendidikan.id", "edukasi.id", "acehkriminologi.ac.id",
+    "harvard.edu", "yale.edu", "stanford.edu", "mit.edu", "cambridge.ac.uk",
+]
+
+# Risky domain extensions that require Roboflow verification
+RISKY_DOMAIN_EXTENSIONS = ('.com', '.id', '.co.id')
+
 SCRAPER_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -89,6 +103,22 @@ ROBOFLOW_API_KEY = os.getenv('ROBOFLOW_API_KEY', '')
 ROBOFLOW_WORKSPACE = os.getenv('ROBOFLOW_WORKSPACE', '')
 ROBOFLOW_WORKFLOW_ID = os.getenv('ROBOFLOW_WORKFLOW_ID', '')
 ROBOFLOW_IMAGE_DIR = os.path.join(os.path.dirname(__file__), 'static', 'generated', 'roboflow')
+
+def is_educational_or_news_domain(url: str) -> bool:
+    """Check if domain is educational or news site that may discuss gambling legitimately"""
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower().replace("www.", "")
+    
+    for edu_domain in EDUCATIONAL_NEWS_DOMAINS:
+        if domain == edu_domain or domain.endswith("." + edu_domain):
+            return True
+    return False
+
+def is_risky_domain_extension(url: str) -> bool:
+    """Check if domain has risky extension (.com, .id, .co.id) that requires Roboflow verification"""
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    return any(domain.endswith(ext) for ext in RISKY_DOMAIN_EXTENSIONS)
 
 def clean_text(text: str) -> str:
     text = str(text).lower()
@@ -505,6 +535,18 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
     features = features or {}
     label = normalize_prediction_label(label)
     roboflow = roboflow or {}
+    
+    # Mitigation: If risky domain extension has Roboflow verification with no gambling detected,
+    # override ML classification to safe (even if ML found many judol keywords)
+    if (
+        is_risky_domain_extension(url)
+        and roboflow.get('enabled')
+        and not roboflow.get('gambling_detected')
+        and roboflow.get('ad_count', 0) == 0
+    ):
+        label = "safe"
+        # Allow keywords to exist in educational/news context
+        # This is legitimate discussion about gambling, not malicious advertising
 
     indicators = []
     vulnerabilities = []
@@ -524,33 +566,68 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
     is_dot_com = parsed.netloc.lower().endswith('.com')
 
     risk_score = 0
+    
+    # Check if this is a whitelisted educational or news domain
+    is_edu_news_domain = is_educational_or_news_domain(url)
+    
+    # Override to safe if educational/news domain discussing gambling topics
+    if is_edu_news_domain:
+        label = "safe"
+        indicators.append("✓ Verified as legitimate educational/news source")
+        indicators.append("Domain is whitelisted for educational and news content about gambling")
+    
+    # Check if this is a risky domain that was verified safe by Roboflow
+    roboflow_verified_safe = (
+        is_risky_domain_extension(url)
+        and roboflow.get('enabled')
+        and not roboflow.get('gambling_detected')
+        and roboflow.get('ad_count', 0) == 0
+    )
 
     if label == "malicious":
-        risk_score += 35
-        indicators.append("Model classifies this URL as malicious")
+        if roboflow_verified_safe:  
+            # Override malicious label if Roboflow verified safe
+            risk_score += 15
+            indicators.append("Verified safe by visual analysis (Roboflow)")
+            indicators.append("ML flagged keywords but visual analysis found no gambling content")
+        else:
+            risk_score += 35
+            indicators.append("Model classifies this URL as malicious")
     elif label == "safe":
         risk_score += 5
-        indicators.append("Model classifies this URL as safe")
+        if roboflow_verified_safe:
+            indicators.append("Verified safe by both ML model and visual analysis")
+        else:
+            indicators.append("Model classifies this URL as safe")
     else:
-        risk_score += 20
-        indicators.append("Model output is inconclusive")
+        if roboflow_verified_safe:
+            risk_score += 10
+            indicators.append("Inconclusive ML result, but verified safe by visual analysis")
+        else:
+            risk_score += 20
+            indicators.append("Model output is inconclusive")
 
-    if confidence >= 0.85:
-        risk_score += 15
-    elif confidence >= 0.65:
-        risk_score += 8
-    else:
-        risk_score += 2
+    if not is_edu_news_domain:
+        if confidence >= 0.85:
+            risk_score += 15
+        elif confidence >= 0.65:
+            risk_score += 8
+        else:
+            risk_score += 2
 
     if judol_hits_total > 0:
-        risk_score += min(20, judol_hits_total * 4)
-        indicators.append(f"{judol_hits_total} gambling-related keyword hit(s) found")
-        vulnerabilities.append({
-            "title": "Judol Keyword Match",
-            "severity": "HIGH" if judol_hits_total >= 2 else "MEDIUM",
-            "domain": "Content Signals",
-            "description": "Page content or URL contains gambling/judol indicators that often appear on malicious pages.",
-        })
+        # If educational/news domain or Roboflow verified safe, judol keywords are legitimate context
+        if is_edu_news_domain or roboflow_verified_safe:
+            indicators.append(f"{judol_hits_total} gambling-related keyword(s) found but in legitimate educational/news context")
+        else:
+            risk_score += min(20, judol_hits_total * 4)
+            indicators.append(f"{judol_hits_total} gambling-related keyword hit(s) found")
+            vulnerabilities.append({
+                "title": "Judol Keyword Match",
+                "severity": "HIGH" if judol_hits_total >= 2 else "MEDIUM",
+                "domain": "Content Signals",
+                "description": "Page content or URL contains gambling/judol indicators that often appear on malicious pages.",
+            })
 
     if suspicious_tld:
         risk_score += 10
@@ -562,7 +639,7 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
             "description": "The domain extension belongs to a TLD that is frequently abused by scam or spam infrastructure.",
         })
 
-    if suspicious_subdomain_score > 0:
+    if suspicious_subdomain_score > 0 and not is_edu_news_domain:
         risk_score += min(12, int(suspicious_subdomain_score * 20))
         indicators.append("Suspicious subdomain pattern detected")
         vulnerabilities.append({
@@ -572,7 +649,7 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
             "description": "Subdomain structure contains terms frequently used for lure, redirect, or fake-login pages.",
         })
 
-    if redirect_indicator_score > 0:
+    if redirect_indicator_score > 0 and not is_edu_news_domain:
         risk_score += min(10, int(redirect_indicator_score * 20))
         indicators.append("Redirect-like path detected")
         vulnerabilities.append({
@@ -592,7 +669,7 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
             "description": "Random-looking domain strings are often used to rotate malicious infrastructure.",
         })
 
-    if metadata_quality < 1.0:
+    if metadata_quality < 1.0 and not roboflow_verified_safe and not is_edu_news_domain:
         risk_score += 6
         indicators.append("Missing or weak metadata")
         vulnerabilities.append({
@@ -602,7 +679,7 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
             "description": "The page exposes limited metadata, reducing trust signals for users and scanners.",
         })
 
-    if metadata_quality == 0.0:
+    if metadata_quality == 0.0 and not roboflow_verified_safe and not is_edu_news_domain:
         risk_score += 20
         indicators.append("Missing title and meta description")
         vulnerabilities.append({
@@ -654,7 +731,7 @@ def build_actionable_insights(url: str, features: dict, label: str, confidence: 
             "risk": "Detected visual gambling ad content",
         })
 
-    if is_dot_com and metadata_quality < 1.0:
+    if is_dot_com and metadata_quality < 1.0 and not roboflow_verified_safe and not is_edu_news_domain:
         added = 16 if metadata_quality == 0.0 else 10
         risk_score += added
         indicators.append("Top-level .com with weak metadata")
@@ -779,14 +856,23 @@ def check_website():
         'recommendations': insights['recommendations'],
         'seoScore': max(0, 100 - risk_score),
         'loadTime': round(0.8 + (len(target_url) / 120 if target_url else 0), 2),
+            'is_safe_label': normalized_label == 'safe',
     }
 
+    # Always run Roboflow for risky domain extensions (.com, .id, .co.id)
+    # or if ML model shows malicious/risky indicators
     should_run_roboflow = (
-        normalized_label == 'malicious'
-        or risk_score >= 45
-        or int(features.get('judol_hits_total', 0) or 0) > 0
-        or (urlparse(target_url).netloc.lower().endswith('.com') and float(features.get('metadata_quality', 0.0) or 0.0) < 1.0)
-        or has_no_metadata
+        is_risky_domain_extension(target_url)
+        or (
+            normalized_label != 'safe'
+            and (
+                normalized_label == 'malicious'
+                or risk_score >= 45
+                or int(features.get('judol_hits_total', 0) or 0) > 0
+                or (urlparse(target_url).netloc.lower().endswith('.com') and float(features.get('metadata_quality', 0.0) or 0.0) < 1.0)
+                or has_no_metadata
+            )
+        )
     )
 
     if target_url and should_run_roboflow:
